@@ -1,0 +1,50 @@
+---
+title: "Data Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+countries_of_the_world
+Country_happy<- merge(X2017,countries_of_the_world)
+happy_country <- Country_happy %>%
+  na.omit()
+library(stringr)
+names(happy_country)<-str_replace_all(names(happy_country), c(" " = "." , "," = "" ))
+names(happy_country)<-str_replace_all(names(happy_country), c("%" = "", "\\("="", "\\)"="", "\\."=""))
+```
+
+```{r}
+mod1<- lm(HappinessScore~Birthrate, data= happy_country)
+summary(mod1)
+ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Birthrate", y="Happiness Score")+
+ geom_jitter() +
+ stat_smooth(method = "lm")
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod2<- lm(HappinessScore~Infantmortalityper1000births+Literacy, data=happy_country)
+summary(mod2)
+ggplot(happy_country, aes(x=Infantmortalityper1000births+Literacy, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Factors", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod3<- lm(HappinessScore~Climate, data=happy_country)
+summary(mod3)
+ggplot(happy_country, aes(x=Climate, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Climate", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
