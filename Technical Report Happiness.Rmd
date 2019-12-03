@@ -189,25 +189,3 @@ meanHappy
 ```
 
 Logistic Regression Models
-
-## Regression Trees
-
-```{r}
-
-
-
-```
-
-## Boosting
-
-```{r}
-
-```
-
-## Random Forest
-
-
-
-
-
-
