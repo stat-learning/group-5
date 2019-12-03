@@ -10,7 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 countries_of_the_world
 Country_happy<- merge(X2017,countries_of_the_world)
-happy_country <- Country_happy %>%
+Country_happy2 <- merge(Country_happy, percievedcorruption)
+happy_country <- Country_happy2 %>%
   na.omit()
 library(stringr)
 names(happy_country)<-str_replace_all(names(happy_country), c(" " = "." , "," = "" ))
