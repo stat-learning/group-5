@@ -16,7 +16,49 @@ happy_country <- Country_happy %>%
   na.omit()
 library(stringr)
 names(happy_country)<-str_replace_all(names(happy_country), c(" " = "." , "," = "" ))
-names(happy_country)<-str_replace_all(names(happy_country), c("%" = "", "\\("="", "\\)"="", "\\."="", "\\$"="_"))
+names(happy_country)<-str_replace_all(names(happy_country), c("%" = "", "\\("="", "\\)"="", "\\."="", "\\$"="_", "/"="by"))
+
+
+happy_country <- subset(happy_country, select = -c(HappinessRank, Whiskerhigh, Whiskerlow, EconomyGDPperCapita, Family, HealthLifeExpectancy, Freedom, Generosity, TrustGovernmentCorruption, DystopiaResidual))
+
+
+class(happy_country$Phonesper1000)
+
+happy_country<-happy_country%>%
+  mutate(Phonesper1000=as.numeric(str_replace_all(Phonesper1000, ",", ".")))
+class(happy_country$Phonesper1000)
+
+happy_country<-happy_country%>%
+  mutate(PopDensitypersqmi=as.numeric(str_replace_all(PopDensitypersqmi, ",", ".")))
+class(happy_country$PopDensitypersqmi)
+
+happy_country<-happy_country%>%
+  mutate(Coastlinecoastbyarearatio=as.numeric(str_replace_all(Coastlinecoastbyarearatio, ",", ".")))
+class(happy_country$Coastlinecoastbyarearatio)
+
+happy_country<-happy_country%>%
+  mutate(Netmigration=as.numeric(str_replace_all(Netmigration, ",", ".")))
+class(happy_country$Netmigration)
+
+happy_country<-happy_country%>%
+  mutate(Arable=as.numeric(str_replace_all(Arable, ",", ".")))
+class(happy_country$Arable)
+
+happy_country<-happy_country%>%
+  mutate(Crops=as.numeric(str_replace_all(Crops, ",", ".")))
+class(happy_country$Crops)
+
+happy_country<-happy_country%>%
+  mutate(Agriculture=as.numeric(str_replace_all(Agriculture, ",", ".")))
+class(happy_country$Agriculture)
+
+happy_country<-happy_country%>%
+  mutate(Industry=as.numeric(str_replace_all(Industry, ",", ".")))
+class(happy_country$Industry)
+
+happy_country<-happy_country%>%
+  mutate(Service=as.numeric(str_replace_all(Service, ",", ".")))
+class(happy_country$Service)
 ```
 
 ```{r}
@@ -189,3 +231,33 @@ meanHappy
 ```
 
 Logistic Regression Models
+=======
+Random Forests
+
+Regression Tree
+
+```{r}
+library(tree)
+library(MASS)
+regtree<- tree(HappinessScore ~ .-HappinessScore,data=num_happy)
+plot(regtree)
+text(regtree, pretty=0)
+
+#Prune
+tcv <- cv.tree(regtree, FUN = prune.tree)
+tcv
+
+plot(tcv$size, tcv$dev, type = "b", xlab = "n leaves", ylab = "error", cex=.75)
+
+tcv$size[which.min(tcv$dev)]
+tprune <- prune.tree(regtree, best = 8)
+plot(tprune)
+text(tprune, pretty = 0)
+tree_est <- predict(tprune, newdata=num_happy)
+MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
+
+```
+PCA
+
+
+>>>>>>> ab458cd7889ae5a98b550c3974e8edecd81e5c31
