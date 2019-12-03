@@ -5,6 +5,8 @@ output: html_document
 
 
 This data comes from a Gallup World Poll asking individuals to rank their life on a scale from 0 to 10 (worst to best life). The happiness index is the HappinessScore and is the average for each country. n = 121 countries, and p = 31 variables (including happiness index).
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -187,5 +189,25 @@ meanHappy
 ```
 
 Logistic Regression Models
+
+## Regression Trees
+
+```{r}
+
+
+
+```
+
+## Boosting
+
+```{r}
+
+```
+
+## Random Forest
+
+
+
+
 
 
