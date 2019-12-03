@@ -1,0 +1,191 @@
+---
+title: "Data Analysis"
+output: html_document
+---
+
+
+This data comes from a Gallup World Poll asking individuals to rank their life on a scale from 0 to 10 (worst to best life). The happiness index is the HappinessScore and is the average for each country. n = 121 countries, and p = 31 variables (including happiness index).
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+countries_of_the_world
+Country_happy<- merge(X2017,countries_of_the_world)
+happy_country <- Country_happy %>%
+  na.omit()
+library(stringr)
+names(happy_country)<-str_replace_all(names(happy_country), c(" " = "." , "," = "" ))
+names(happy_country)<-str_replace_all(names(happy_country), c("%" = "", "\\("="", "\\)"="", "\\."="", "\\$"="_"))
+```
+
+```{r}
+mod1<- lm(HappinessScore~Birthrate, data= happy_country)
+summary(mod1)
+ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Birthrate", y="Happiness Score")+
+ geom_jitter() +
+ stat_smooth(method = "lm")
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod2<- lm(HappinessScore~Infantmortalityper1000births+Literacy, data=happy_country)
+summary(mod2)
+ggplot(happy_country, aes(x=Infantmortalityper1000births+Literacy, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Factors", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod3<- lm(HappinessScore~Climate, data=happy_country)
+summary(mod3)
+ggplot(happy_country, aes(x=Climate, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Climate", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
+
+```{r}
+num_happy<- happy_country %>%
+  select_if(is.numeric)
+pairs(num_happy[,1:4], pch = 19)
+summary(happy_country)
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod5<- lm(HappinessScore~GDP_percapita, data=happy_country)
+summary(mod5)
+ggplot(happy_country, aes(x=GDP_percapita, y=HappinessScore)) +
+  geom_point()+
+  labs(x="GDP Per Capita", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+
+```
+
+Linear Models
+```{r}
+lm1<- lm(HappinessScore~Literacy, data= happy_country)
+summary(lm1)
+lmplot1<- ggplot(happy_country, aes(x = Literacy, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Literacy", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot1
+
+lm2<- lm(HappinessScore~Birthrate, data= happy_country)
+summary(lm2)
+lmplot2<- ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Birthrate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot2
+
+lm3<- lm(HappinessScore~Deathrate, data= happy_country)
+summary(lm3)
+lmplot3<- ggplot(happy_country, aes(x = Deathrate, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Death Rate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot3
+
+lm4<- lm(HappinessScore~Climate, data= happy_country)
+summary(lm4)
+lmplot4<- ggplot(happy_country, aes(x = Climate, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Climate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot4
+
+lm5<- lm(HappinessScore~Population, data= happy_country)
+summary(lm5)
+lmplot5<- ggplot(happy_country, aes(x = Population, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Population", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot5
+```
+
+Ridge and Lasso
+
+```{r model_matrix, message = FALSE, eval = FALSE}
+library(tidyverse)
+library(glmnet)
+X <- model.matrix(HappinessScore ~ ., data = num_happy)[, -1]
+X[1:2, ]
+Y <- num_happy$HappinessScore
+lambdas <- seq(from = 1e4, to = 1e-2, length.out = 100)
+rm1 <- glmnet(x = X, y = Y, alpha = 0, 
+              lambda = lambdas, standardize = TRUE)
+summary(rm1)
+class(rm1)
+cv_rm1 <- cv.glmnet(X, Y, alpha = 0, lambda = lambdas)
+plot(cv_rm1)
+
+best_lambda <- cv_rm1$lambda.min
+best_lambda
+view(best_lambda)
+
+set.seed(1)
+training= sample(1:nrow(X), nrow(X)/2)
+testing=(-training)
+y_test =Y[testing]
+
+ridge_mod2= glmnet(X[training,], Y[training], alpha=0, lambda = lambdas, thresh = 1e-12)
+rm_pred = predict(ridge_mod2, s=best_lambda, newx = X[testing,])
+MSE_ridge <- mean((rm_pred - y_test)^2)
+MSE_ridge
+
+#Lasso
+
+Y2 <- num_happy$HappinessScore
+lambdas <- seq(from = 1e4, to = 1e-2, length.out = 100)
+lasso_mod <- glmnet(x=X, y=Y, alpha =1, lambda = lambdas, standardize = TRUE)
+class(lasso_mod)
+
+cv_lasso_mod <- cv.glmnet(X[training,], Y2[training], alpha = 1, lambda = lambdas)
+plot(cv_lasso_mod)
+
+best2_lambda <- cv_lasso_mod$lambda.min
+best2_lambda
+
+#Lasso MSE
+set.seed(1)
+training = sample(1:nrow(X), nrow(X)/2)
+testing = (-training)
+Y2_test = Y2[testing]
+
+lasso_m2 = glmnet(X[training,], Y2[training], 
+                  alpha = 1, lambda = lambdas, thresh = 1e-12)
+lasso_prediction = predict(lasso_m2, s = best2_lambda, newx = X[testing,])
+mean((lasso_prediction - Y2_test)^2)
+
+out_2 <- glmnet(X,Y2, alpha = 1)
+predict(out_2, type = "coefficients" , s = best2_lambda) [1:52]
+```
+
+```{r}
+CountryPlot<- ggplot(happy_country, aes(x = Country, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Country", y="Happiness Score")
+CountryPlot
+meanHappy<-mean(happy_country[["HappinessScore"]])
+meanHappy
+```
+
+Logistic Regression Models
+
+
