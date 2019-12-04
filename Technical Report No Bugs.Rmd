@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 countries_of_the_world
 Country_happy<- merge(X2017,countries_of_the_world)
-Country_happy2 <- merge(Country_happy, percievedcorruption)
+Country_happy2 <- merge(Country_happy, percievedcorruptionwithUS)
 happy_country <- Country_happy2 %>%
   na.omit()
 library(stringr)
@@ -60,6 +60,13 @@ class(happy_country$Industry)
 happy_country<-happy_country%>%
   mutate(Service=as.numeric(str_replace_all(Service, ",", ".")))
 class(happy_country$Service)
+```
+
+```{r}
+happy_country_nocat <- happy_country %>%
+  select(-c(Region, Country, Climate))
+happy_country_cor <- happy_country_nocat %>%
+  cor(happy_country_nocat)
 ```
 
 ```{r}
