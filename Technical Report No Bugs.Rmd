@@ -63,8 +63,7 @@ class(happy_country$Service)
 ```
 
 ```{r}
-happy_country_nocat <- happy_country %>%
-  select(-c(Region, Country, Climate))
+happy_country_nocat <- subset(happy_country, select = -c(Region, Country, Climate))
 happy_country_cor <- happy_country_nocat %>%
   cor(happy_country_nocat)
 ```
