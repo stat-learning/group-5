@@ -1,6 +1,8 @@
 ---
 title: "Data Analysis"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -257,9 +259,4 @@ MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
 
 PCA
 
-```{r}
-pca1 <- prcomp(y_data, scale = TRUE)
-
-
-```
 
