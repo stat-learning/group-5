@@ -1,0 +1,45 @@
+
+```{r}
+library(tidyverse)
+library(dplyr)
+happy_country
+```
+
+```{r}
+eastern_europe <- filter(happy_country, Region == "EASTERN EUROPE") %>%
+  select(-c(Region, Country, Climate))
+eastern_europe_cor <- eastern_europe %>%
+  cor(eastern_europe)
+```
+```{r}
+western_europe <- filter(happy_country, Region == "WESTERN EUROPE") %>%
+  select(-c(Region, Country, Climate))
+western_europe_cor <- western_europe %>%
+  cor(western_europe)
+```
+```{r}
+latin_america_carib <- filter(happy_country, Region == "LATIN AMER. & CARIB")%>%
+  select(-c(Region, Country, Climate))
+latin_america_carib_cor <- latin_america_carib %>%
+  cor(latin_america_carib)
+```
+
+```{r}
+happy_country$Region[happy_country$Region == "NORTHERN AFRICA"] <- "AFRICA"
+happy_country$Region[happy_country$Region == "SUB-SAHARAN AFRICA"] <- "AFRICA"
+africa <- filter(happy_country, Region == "AFRICA")%>%
+  select(-c(Region, Country, Climate))
+africa_cor <- africa %>%
+  cor(africa)
+```
+
+```{r}
+
+alymod<- lm(HappinessScore~PercievedCorruptionScore, data=happy_country)
+summary(alymod)
+ggplot(happy_country, aes(x=PercievedCorruptionScore, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Percieved Corruption Score", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```

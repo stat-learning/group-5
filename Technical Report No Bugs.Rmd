@@ -1,6 +1,8 @@
 ---
-title: "Data Analysis"
-output: html_document
+title: "Technical Report No Bugs"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -58,13 +60,6 @@ class(happy_country$Industry)
 happy_country<-happy_country%>%
   mutate(Service=as.numeric(str_replace_all(Service, ",", ".")))
 class(happy_country$Service)
-```
-
-```{r}
-happy_country_nocat <- happy_country %>%
-  select(-c(Region, Country, Climate))
-happy_country_cor <- happy_country_nocat %>%
-  cor(happy_country_nocat)
 ```
 
 ```{r}
@@ -262,26 +257,22 @@ MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
 
 ```
 
-PCA
-
+## Boost
 ```{r}
-pca1 <- prcomp(y_data, scale = TRUE)
-
-
+set.seed(1)
+train <- sample(1:nrow(num_happy), nrow(num_happy) * .75)
+traind <- num_happy[train, ]
+testd <- num_happy[-train, ]
+library(gbm)
+boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=num_happy,
+                     distribution = "multinomial", n.trees = 50,
+                     shrinkage = 0.1, interaction.depth = 1)
+yhat <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
+predicted <- LETTERS[apply(yhat, 1, which.max)]
+t1 <- table(predicted, testd$V1)
+t1
+MR <- 1-sum(diag(t1))/sum(t1)
+MR
 ```
 
-## Random Forest
-```{r}
-library(randomForest)
-model11 <- randomForest(HappinessScore ~ .-HappinessScore, data = num_happy, importance = TRUE)
-model11
-plot(model11)
-
-
-
-```
-
-
-
 PCA
-
