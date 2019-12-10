@@ -392,3 +392,18 @@ ggplot(d1, aes(x = PC, y = PVE)) +
   theme_bw(base_size = 18)
 ```
 
+<<<<<<< HEAD
+=======
+## Random Forest
+
+```{r}
+library(randomForest)
+rf <- randomForest(HappinessScore ~ .-HappinessScore, data = num_happy, importance = TRUE)
+rf
+plot(rf)
+predictrf <- predict(rf, num_happy, type = "response")
+predictrf
+MSErf<- mean((predictrf - num_happy$HappinessScore)^2)
+MSErf
+```
+>>>>>>> 9295f90abf23b64023815594482bcb307cf14666
