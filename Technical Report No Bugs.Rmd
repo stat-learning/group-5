@@ -282,3 +282,36 @@ MR
 ```
 
 PCA
+
+```{r}
+pca1 <- prcomp(num_happy, center=TRUE, scale. =  TRUE)
+summary(pca1)
+str(pca1)
+```
+
+```{r}
+library(devtools)
+install_github("vqv/ggbiplot")
+library(ggbiplot)
+```
+
+```{r}
+ggbiplot(pca1)
+
+dat <- as.data.frame(pca1$x)
+PCAPlot <- ggplot(dat, aes(x = PC1, y = PC2)) +
+  geom_point(size = 3) +
+  xlim(c(-3, 3)) +
+  theme_bw(base_size = 18)
+PCAPlot
+
+```
+Scree Plot
+```{r echo = FALSE, fig.align="center", fig.height = 5.5, fig.width=7}
+d1 <- data.frame(PC = 1:20,
+                PVE = pca1$sdev^2 / sum(pca1$sdev^2))
+ggplot(d1, aes(x = PC, y = PVE)) +
+  geom_line() + 
+  geom_point() +
+  theme_bw(base_size = 18)
+```
