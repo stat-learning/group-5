@@ -170,6 +170,29 @@ lmplot5<- ggplot(happy_country, aes(x = Population, y = HappinessScore)) +
 lmplot5
 ```
 
+```{r}
+mod255<- lm(HappinessScore~Phonesper1000 + GDP_percapita + Literacy + Deathrate, data=happy_country)
+summary(mod255)
+mod255plot<- ggplot(happy_country, aes(x=Phonesper1000+GDP_percapita+Literacy+Deathrate, y=HappinessScore))+
+  geom_point()+
+  labs(x="Factors", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+mod255plot
+```
+
+```{r}
+lm6<- lm(HappinessScore~PercievedCorruptionScore, data= happy_country)
+summary(lm6)
+lmplot6<- ggplot(happy_country, aes(x = PercievedCorruptionScore, y = HappinessScore)) + 
+  geom_point() +
+  labs(x="Perceived Corruption", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot6
+
+```
+
 Ridge and Lasso
 
 ```{r model_matrix, message = FALSE, eval = FALSE}
@@ -228,6 +251,58 @@ out_2 <- glmnet(X,Y2, alpha = 1)
 predict(out_2, type = "coefficients" , s = best2_lambda) [1:52]
 ```
 
+#Ridge Try 2
+```{r}
+library(broom)
+library(glmnet)
+
+yridge <- num_happy$HappinessScore
+xridge <- num_happy %>% data.matrix()
+lambdasridge <- 10^seq(3, -2, by = -.1)
+
+fit <- glmnet(xridge, yridge, alpha = 0, lambda = lambdasridge)
+summary(fit)
+
+cv_fit <- cv.glmnet(xridge, yridge, alpha = 0, lambda = lambdasridge)
+
+plot(cv_fit)
+
+opt_lambda <- cv_fit$lambda.min
+opt_lambda
+
+fit <- cv_fit$glmnet.fit
+summary(fit)
+```
+
+
+#Lasso Try 2
+
+```{r}
+x_vars <- model.matrix(HappinessScore~. , num_happy)[,-1]
+y_var <- num_happy$HappinessScore
+lambda_seq <- 10^seq(2, -2, by = -.1)
+
+# Splitting the data into test and train
+set.seed(86)
+train = sample(1:nrow(x_vars), nrow(x_vars)/2)
+x_test = (-train)
+y_test = y_var[test]
+
+cv_output <- cv.glmnet(x_vars[train,], y_var[train], 
+            alpha = 1, lambda = lambda_seq)
+
+# identifying best lamda
+best_lam <- cv_output$lambda.min
+best_lam
+
+
+lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam)
+pred <- predict(lasso_best, s = best_lam, newx = x_vars[test,])
+
+final <- cbind(y_var[test], pred)
+
+```
+
 ```{r}
 CountryPlot<- ggplot(happy_country, aes(x = Country, y = HappinessScore)) +
  geom_point() +
@@ -260,6 +335,7 @@ plot(tprune)
 text(tprune, pretty = 0)
 tree_est <- predict(tprune, newdata=num_happy)
 MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
+MSE_test
 
 ```
 
@@ -316,6 +392,8 @@ ggplot(d1, aes(x = PC, y = PVE)) +
   theme_bw(base_size = 18)
 ```
 
+<<<<<<< HEAD
+=======
 ## Random Forest
 
 ```{r}
@@ -328,3 +406,4 @@ predictrf
 MSErf<- mean((predictrf - num_happy$HappinessScore)^2)
 MSErf
 ```
+>>>>>>> 9295f90abf23b64023815594482bcb307cf14666

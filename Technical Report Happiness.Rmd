@@ -267,18 +267,3 @@ MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
 PCA
 
 
-## Random Forest
-```{r}
-library(randomForest)
-model11 <- randomForest(HappinessScore ~ .-HappinessScore, data = num_happy, importance = TRUE)
-model11
-plot(model11)
-
-
-
-```
-
-
-
-PCA
-
