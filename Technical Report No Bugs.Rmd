@@ -346,15 +346,12 @@ train <- sample(1:nrow(num_happy), nrow(num_happy) * .75)
 traind <- num_happy[train, ]
 testd <- num_happy[-train, ]
 library(gbm)
-boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=num_happy,
+boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=traind,
                      distribution = "multinomial", n.trees = 50,
                      shrinkage = 0.1, interaction.depth = 1)
-yhat <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
-predicted <- LETTERS[apply(yhat, 1, which.max)]
-t1 <- table(predicted, testd$V1)
-t1
-MR <- 1-sum(diag(t1))/sum(t1)
-MR
+pred66 <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
+MSE_test2<- mean((pred66 - testd$HappinessScore)^2)
+MSE_test2
 ```
 
 PCA
@@ -391,19 +388,14 @@ ggplot(d1, aes(x = PC, y = PVE)) +
   geom_point() +
   theme_bw(base_size = 18)
 ```
-
-<<<<<<< HEAD
-=======
 ## Random Forest
 
 ```{r}
 library(randomForest)
-rf <- randomForest(HappinessScore ~ .-HappinessScore, data = num_happy, importance = TRUE)
+rf <- randomForest(HappinessScore ~ .-HappinessScore, data = traind, importance = TRUE)
 rf
 plot(rf)
-predictrf <- predict(rf, num_happy, type = "response")
-predictrf
-MSErf<- mean((predictrf - num_happy$HappinessScore)^2)
-MSErf
+testrf <- predict(rf, newdata=testd)
+MSE2<- mean((testrf - testd$HappinessScore)^2)
+MSE2
 ```
->>>>>>> 9295f90abf23b64023815594482bcb307cf14666
