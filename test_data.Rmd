@@ -8,7 +8,6 @@ output: html_notebook
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 countries_of_the_world
-X2018
 country_happy_test<- merge(X2018,countries_of_the_world)
 country_happy_test2 <- merge(country_happy_test, percievedcorruptionwithUS)
 happy_country_test <- country_happy_test2 %>%
