@@ -4,13 +4,10 @@ output:
   pdf_document: default
   html_document: default
 ---
-
-
 This data comes from a Gallup World Poll asking individuals to rank their life on a scale from 0 to 10 (worst to best life). The happiness index is the HappinessScore and is the average for each country. n = 121 countries, and p = 31 variables (including happiness index).
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-countries_of_the_world
 Country_happy<- merge(X2017,countries_of_the_world)
 Country_happy2 <- merge(Country_happy, percievedcorruptionwithUS)
 happy_country <- Country_happy2 %>%
@@ -106,12 +103,9 @@ ggplot(happy_country, aes(x=Climate, y=HappinessScore)) +
 num_happy<- happy_country %>%
   select_if(is.numeric)
 pairs(num_happy[,1:4], pch = 19)
-summary(happy_country)
 ```
 
 ```{r}
-summary(happy_country)
-names(happy_country)
 mod5<- lm(HappinessScore~GDP_percapita, data=happy_country)
 summary(mod5)
 ggplot(happy_country, aes(x=GDP_percapita, y=HappinessScore)) +
@@ -119,7 +113,6 @@ ggplot(happy_country, aes(x=GDP_percapita, y=HappinessScore)) +
   labs(x="GDP Per Capita", y="Happiness Score") +
   geom_jitter()+
   stat_smooth(method = "lm")
-
 ```
 
 Linear Models
@@ -392,7 +385,6 @@ ggplot(d1, aes(x = PC, y = PVE)) +
   theme_bw(base_size = 18)
 ```
 
-<<<<<<< HEAD
 =======
 ## Random Forest
 
@@ -406,4 +398,4 @@ predictrf
 MSErf<- mean((predictrf - num_happy$HappinessScore)^2)
 MSErf
 ```
->>>>>>> 9295f90abf23b64023815594482bcb307cf14666
+
