@@ -6,40 +6,94 @@ happy_country
 ```
 
 ```{r}
-eastern_europe <- filter(happy_country, Region == "EASTERN EUROPE") %>%
-  select(-c(Region, Country, Climate))
-eastern_europe_cor <- eastern_europe %>%
-  cor(eastern_europe)
-```
-```{r}
-western_europe <- filter(happy_country, Region == "WESTERN EUROPE") %>%
-  select(-c(Region, Country, Climate))
-western_europe_cor <- western_europe %>%
-  cor(western_europe)
-```
-```{r}
-latin_america_carib <- filter(happy_country, Region == "LATIN AMER. & CARIB")%>%
-  select(-c(Region, Country, Climate))
-latin_america_carib_cor <- latin_america_carib %>%
-  cor(latin_america_carib)
+eastern_europe <- filter(happy_country, Region == "EASTERN EUROPE")
+eastern_europe_nocat <- subset(eastern_europe, select = -c(Region, Country, Climate))
+eastern_europe_cor <- eastern_europe_nocat %>%
+  cor(eastern_europe_nocat)
 ```
 
 ```{r}
-happy_country$Region[happy_country$Region == "NORTHERN AFRICA"] <- "AFRICA"
-happy_country$Region[happy_country$Region == "SUB-SAHARAN AFRICA"] <- "AFRICA"
-africa <- filter(happy_country, Region == "AFRICA")%>%
-  select(-c(Region, Country, Climate))
-africa_cor <- africa %>%
-  cor(africa)
+western_europe <- filter(happy_country, Region == "WESTERN EUROPE")
+western_europe_nocat <- subset(western_europe, select = -c(Region, Country, Climate))
+western_europe_cor <- western_europe_nocat %>%
+  cor(western_europe_nocat)
+```
+  
+```{r}
+latin_america_carib <- filter(happy_country, Region == "LATIN AMER. & CARIB")
+latin_america_carib_nocat <- subset(latin_america_carib, select = -c(Region, Country, Climate))
+latin_america_carib_cor <- latin_america_carib_nocat %>%
+  cor(latin_america_carib_nocat)
+```
+
+
+```{r}
+happy_country2 <- happy_country
+happy_country2$Region[happy_country2$Region == "NORTHERN AFRICA"] <- "AFRICA"
+happy_country2$Region[happy_country2$Region == "SUB-SAHARAN AFRICA"] <- "AFRICA"
+africa <- filter(happy_country2, Region == "AFRICA")
+africa_nocat <- subset(africa, select = -c(Region, Country, Climate))
+africa_cor <- africa_nocat %>%
+  cor(africa_nocat)
 ```
 
 ```{r}
+#Happiness Score sorted by Region
+RegionPlot<- ggplot(happy_country, aes(x = Region, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Region", y="Happiness Score")
+RegionPlot
+```
 
-alymod<- lm(HappinessScore~PercievedCorruptionScore, data=happy_country)
+```{r}
+#Region Linear Model
+alymod<- lm(HappinessScore ~ Region, data = happy_country)
 summary(alymod)
-ggplot(happy_country, aes(x=PercievedCorruptionScore, y=HappinessScore)) +
-  geom_point()+
-  labs(x="Percieved Corruption Score", y="Happiness Score") +
-  geom_jitter()+
-  stat_smooth(method = "lm")
 ```
+Adjusted R-squared: 0.5754
+```{r}
+#Region + GDP + Infant Mortality + Percieved Corruption
+alymod2 <- lm(HappinessScore ~ Region + GDP_percapita +
+                Infantmortalityper1000births + PercievedCorruptionScore,
+              data = happy_country)
+summary(alymod2)
+```
+Adjusted R-squared: 0.7558
+```{r}
+#Region + GDP + Arable Land + Percieved Corruption
+alymod3 <- lm(HappinessScore ~ Region + GDP_percapita + Arable + 
+                PercievedCorruptionScore, data = happy_country)
+summary(alymod3)
+```
+Adjusted R-squared: 0.7590
+```{r}
+#Region + GDP + Arable Land + Infant Mortality
+alymod4 <- lm(HappinessScore ~ Region + GDP_percapita + Arable + 
+                Infantmortalityper1000births, data = happy_country)
+summary(alymod4)
+```
+Adjusted R-squared: 0.7627
+```{r}
+#Region + GDP + Arable Land + Infant Mortality + Percieved Corruption
+alymod5 <- lm(HappinessScore ~ Region + GDP_percapita + Arable + 
+              Infantmortalityper1000births + PercievedCorruptionScore, 
+              data = happy_country)
+summary(alymod5)
+```
+Adjusted R-squared: 0.7644
+```{r}
+#Region + GDP + Arable Land + Infant Mortality + Percieved Corruption + Coastline Area
+alymod6 <- lm(HappinessScore ~ Region + GDP_percapita + Arable + 
+              Infantmortalityper1000births + PercievedCorruptionScore + 
+                Coastlinecoastbyarearatio, data = happy_country)
+summary(alymod6)
+```
+Adjusted R-squared: 0.7648 
+```{r}
+#GDP + Arable Land + Infant Mortality + Percieved Corruption
+alymod7 <- lm(HappinessScore ~ GDP_percapita + Arable + 
+              Infantmortalityper1000births + PercievedCorruptionScore, 
+                data = happy_country)
+summary(alymod7)
+```
+Adjusted R-squared: 0.6734
