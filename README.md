@@ -1,4 +1,4 @@
-# Statistical Learning: [insert project title]
+# Statistical Learning: Predicting Happiness
 
 ## Authors
 
@@ -8,15 +8,10 @@ Eva Licht
 
 Joe Yalowitz
 
-## Final Topic:
+## Abstract:
 
-Still need feedback from Andrew before we can choose one
+We are investigating the World Happiness Index in order to build a model that can predict a country's Happiness Score based on demographic and geographic factors such as literacy levels, cell-phone use, birth rate, death rate, GDP per capita, perceived corruption, etc. We will build an array of linear models, simple and with interaction, and use other regression analysis tools such as Ridge, Lasso, and PCA to understand our data. We will also use regression trees, random forests, and boosted trees to develop prediction methods for our research question. We have determined by running our training data and validated with our test data, that region is an optimal predictor of happiness.  
 
-## Timeline:
 
-* Pre-proposal: Sunday 11/3 11:59 pm
-* Group proposal: Thursday 11/7 11:59 pm
-* Technical Report (Exploratory Data Analysis section only) : Wednesday 11/20 before class
-* Technical Report: Monday 12/2 before class
-* Final Presentations: Wednesday 12/4 and Monday 12/9 in class
+Our presentation can be found here: https://docs.google.com/presentation/d/1MTjG5kiYoIBgd15PBpHNc3_UT2VoTpzPwrvBq9mjS94/edit?usp=sharing
 
