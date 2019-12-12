@@ -1,5 +1,5 @@
 ---
-title: "PredictingHappiness"
+title: "Predicting Happiness"
 output: pdf_document
 ---
 ## Abstract
@@ -11,10 +11,8 @@ Our final dataset pulls data from a wide variety of sources.  We obtained our â€
 
 ## Exploratory Data Analysis
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
-countries_of_the_world
 Country_happy<- merge(X2017,countries_of_the_world)
 Country_happy2 <- merge(Country_happy, percievedcorruptionwithUS)
 happy_country <- Country_happy2 %>%
@@ -66,19 +64,8 @@ happy_country<-happy_country%>%
 class(happy_country$Service)
 ```
 
-```{r}
-#LM Birthrate
-mod1<- lm(HappinessScore~Birthrate, data= happy_country)
-summary(mod1)
-ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
- geom_point() +
- labs(x="Birthrate", y="Happiness Score")+
- geom_jitter() +
- stat_smooth(method = "lm")
-```
 
-
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #LM Factors
 summary(happy_country)
 names(happy_country)
@@ -91,13 +78,13 @@ ggplot(happy_country, aes(x=Infantmortalityper1000births+Literacy, y=HappinessSc
   stat_smooth(method = "lm")
 ```
 
-```{r}
+```{r, include=FALSE}
 num_happy<- happy_country %>%
   select_if(is.numeric)
 pairs(num_happy[,1:4], pch = 19)
 ```
 
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 names(happy_country)
 mod5<- lm(HappinessScore~GDP_percapita, data=happy_country)
 summary(mod5)
@@ -108,7 +95,7 @@ ggplot(happy_country, aes(x=GDP_percapita, y=HappinessScore)) +
   stat_smooth(method = "lm")
 ```
 
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 lm1<- lm(HappinessScore~Literacy, data= happy_country)
 summary(lm1)
 lmplot1<- ggplot(happy_country, aes(x = Literacy, y = HappinessScore)) +
@@ -117,6 +104,10 @@ lmplot1<- ggplot(happy_country, aes(x = Literacy, y = HappinessScore)) +
   geom_jitter() +
   stat_smooth(method = "lm")
 lmplot1
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
+
 lm2<- lm(HappinessScore~Birthrate, data= happy_country)
 summary(lm2)
 lmplot2<- ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
@@ -125,6 +116,11 @@ lmplot2<- ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
   geom_jitter() +
   stat_smooth(method = "lm")
 lmplot2
+
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
+
 lm3<- lm(HappinessScore~Deathrate, data= happy_country)
 summary(lm3)
 lmplot3<- ggplot(happy_country, aes(x = Deathrate, y = HappinessScore)) +
@@ -135,7 +131,7 @@ lmplot3<- ggplot(happy_country, aes(x = Deathrate, y = HappinessScore)) +
 lmplot3
 ```
 
-```{r}
+```{r, include=FALSE}
 CountryPlot<- ggplot(happy_country, aes(x = Country, y = HappinessScore)) +
  geom_point() +
  labs(x="Country", y="Happiness Score")
@@ -152,13 +148,13 @@ summary(pca1)
 str(pca1)
 ```
 
-```{r}
+```{r, include=FALSE}
 library(devtools)
 install_github("vqv/ggbiplot")
 library(ggbiplot)
 ```
 
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 ggbiplot(pca1)
 dat <- as.data.frame(pca1$x)
 PCAPlot <- ggplot(dat, aes(x = PC1, y = PC2)) +
@@ -179,7 +175,7 @@ ggplot(d1, aes(x = PC, y = PVE)) +
 ```
 
 ##Breakdown of Variables and Regions Data
-```{r}
+```{r, include=FALSE}
 #Eastern Europe Region
 eastern_europe <- filter(happy_country, Region == "EASTERN EUROPE")
 eastern_europe_nocat <- subset(eastern_europe, select = -c(Region, Country, Climate))
@@ -275,6 +271,7 @@ RegionPlot
 ## Modeling
 Ridge and Lasso
 ```{r}
+library(broom)
 xnew <- model.matrix(HappinessScore~., num_happy)[,-1]
 ynew <- num_happy$HappinessScore
 lambdanew <- 10^seq(10, -2, length = 100)
@@ -286,17 +283,36 @@ ytestnew <- ynew[testnew]
 #OLS
 happylm <- lm(HappinessScore~., data = num_happy)
 coef(happylm)
+sldhappy <- summary(happylm)
+sldhappy
+olscoeftab<- coef(sldhappy)
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
+olscoeftab
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #OLS with interaction
 olsmod<- lm(HappinessScore~Agriculture*Industry*Service, data=num_happy)
 par(mfrow = c(2, 2))
 OLS<- plot(olsmod)
+```
+
+```{r}
 OLSpred<-predict(olsmod, newdata=num_happy[testnew,])
 OLSMSE<- mean((OLSpred-ytestnew)^2)
 OLSMSE
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #OLS without interaction
 olsmod2<- lm(HappinessScore~Agriculture+Industry+Service, data=num_happy)
 par(mfrow = c(2, 2))
 OLS2<- plot(olsmod2)
+```
+
+```{r}
 OLSpred2<- predict(olsmod2, newdata = num_happy[testnew,])
 OLS2MSE <- mean((OLSpred2-ytestnew)^2)
 OLS2MSE
@@ -307,9 +323,16 @@ predict(happyridge, s = 0, exact = FALSE, type = 'coefficients')[1:20,]
 happylm1 <- lm(HappinessScore~., data = num_happy)
 happyridge1 <- glmnet(xnew[trainnew,], ynew[trainnew], alpha = 0, lambda = lambdanew)
 #find the best lambda from our list via cross-validation
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 cv.out <- cv.glmnet(xnew[trainnew,], ynew[trainnew], alpha = 0)
 plot(cv.out)
+```
+
+```{r}
 bestlamnew <- cv.out$lambda.min
+bestlamnew
 #make predictions
 rpred1<- predict(happyridge, s=bestlamnew, newx = xnew[testnew,])
 ridge.prednew <- predict(happyridge1, s = bestlamnew, newx = xnew[testnew,])
@@ -339,17 +362,29 @@ Regression Trees
 ```{r}
 library(tree)
 library(MASS)
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 regtree<- tree(HappinessScore ~ .-HappinessScore,data=num_happy)
 plot(regtree)
 text(regtree, pretty=0)
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Prune
 tcv <- cv.tree(regtree, FUN = prune.tree)
 tcv
 plot(tcv$size, tcv$dev, type = "b", xlab = "n leaves", ylab = "error", cex=.75)
 tcv$size[which.min(tcv$dev)]
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 tprune <- prune.tree(regtree, best = 8)
 plot(tprune)
 text(tprune, pretty = 0)
+```
+
+```{r}
 tree_est <- predict(tprune, newdata=num_happy)
 MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
 MSE_test
@@ -369,6 +404,20 @@ boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=traind,
 pred66 <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
 MSE_test2<- mean((pred66 - testd$HappinessScore)^2)
 MSE_test2
+```
+## Random Forest
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
+library(randomForest)
+rf <- randomForest(HappinessScore ~ .-HappinessScore, data = traind, importance = TRUE)
+rf
+plot(rf)
+```
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
+testrf <- predict(rf, newdata=testd)
+MSE2<- mean((testrf - testd$HappinessScore)^2)
+MSE2
+varImpPlot(rf)
 ```
 
 LINEAR MODELS
@@ -425,41 +474,44 @@ summary(alymod6)
 ```
 Adjusted R-squared: 0.7648 
 
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of Region
 ggplot(happy_country, aes(x = Region)) +
 geom_histogram(fill = "steelblue", stat="count") +
 theme_bw()
 ```
-```{r}
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of GDP per capita
 logGDP <- log(happy_country$GDP_percapita)
 ggplot(happy_country, aes(x = GDP_percapita)) +
 geom_histogram(fill = "steelblue") +
 theme_bw()
 ```
-```{r}
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of Arable
 logArable <- log(happy_country$Arable)
 ggplot(happy_country, aes(x = logArable)) +
 geom_histogram(fill = "steelblue", bins = "15") +
 theme_bw()
 ```
-```{r}
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of Infantmortalityper1000births
 logInfantmortality <- log(happy_country$Infantmortalityper1000births)
 ggplot(happy_country, aes(x = logInfantmortality)) +
 geom_histogram(fill = "steelblue", bins = "10") +
 theme_bw()
 ```
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of PercievedCorruptionScore
 logPercievedCorruptionScore <- log(happy_country$PercievedCorruptionScore)
 ggplot(happy_country, aes(x = logPercievedCorruptionScore)) +
 geom_histogram(fill = "steelblue", bins = "10") +
 theme_bw()
 ```
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Normality of Coastlinecoastbyarearatio
 logCoastlinecoastbyarearatio <- log(happy_country$Coastlinecoastbyarearatio)
 lnCoastlinecoastbyarearatio <- log1p(happy_country$Coastlinecoastbyarearatio)
@@ -497,7 +549,7 @@ predict(linearmodel1, newdata = testD)
 training_MSE <- mean(linearmodel1$residuals^2)
 training_MSE
 ```
-```{r}
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Residuals 1
 par(mfrow = c(1, 2))
 plot(linearmodel1, 1:2)
@@ -517,7 +569,8 @@ predict(linearmodel2, newdata = testD)
 training_MSE2 <- mean(linearmodel2$residuals^2)
 training_MSE2
 ```
-```{r}
+
+```{r figs, echo=FALSE, fig.width=7,fig.height=6,fig.cap="\\label{fig:figs}plotting example"}
 #Residuals 2
 par(mfrow = c(1, 2))
 plot(linearmodel2, 1:2)
