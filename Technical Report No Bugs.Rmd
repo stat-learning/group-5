@@ -5,6 +5,7 @@ output:
   html_document: default
 ---
 This data comes from a Gallup World Poll asking individuals to rank their life on a scale from 0 to 10 (worst to best life). The happiness index is the HappinessScore and is the average for each country. n = 121 countries, and p = 31 variables (including happiness index).
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -265,6 +266,9 @@ opt_lambda
 
 fit <- cv_fit$glmnet.fit
 summary(fit)
+
+ridgefinalmod= glmnet(xridge[training,], yridge[training], alpha=0, lambda = lambdas, thresh = 1e-12)
+rm_pred = predict(ridge_mod2, s=best_lambda, newx = X[testing,])
 ```
 
 
@@ -293,7 +297,7 @@ lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam)
 pred <- predict(lasso_best, s = best_lam, newx = x_vars[test,])
 
 final <- cbind(y_var[test], pred)
-
+final
 ```
 
 ```{r}
@@ -339,15 +343,12 @@ train <- sample(1:nrow(num_happy), nrow(num_happy) * .75)
 traind <- num_happy[train, ]
 testd <- num_happy[-train, ]
 library(gbm)
-boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=num_happy,
+boost1 <- gbm(HappinessScore ~ .-HappinessScore,data=traind,
                      distribution = "multinomial", n.trees = 50,
                      shrinkage = 0.1, interaction.depth = 1)
-yhat <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
-predicted <- LETTERS[apply(yhat, 1, which.max)]
-t1 <- table(predicted, testd$V1)
-t1
-MR <- 1-sum(diag(t1))/sum(t1)
-MR
+pred66 <- predict(boost1, newdata = testd, n.trees = 50, type = "response", shrinkage = 0.1, interaction.depth = 1)
+MSE_test2<- mean((pred66 - testd$HappinessScore)^2)
+MSE_test2
 ```
 
 PCA
@@ -385,17 +386,16 @@ ggplot(d1, aes(x = PC, y = PVE)) +
   theme_bw(base_size = 18)
 ```
 
-=======
+
 ## Random Forest
 
 ```{r}
 library(randomForest)
-rf <- randomForest(HappinessScore ~ .-HappinessScore, data = num_happy, importance = TRUE)
+rf <- randomForest(HappinessScore ~ .-HappinessScore, data = traind, importance = TRUE)
 rf
 plot(rf)
-predictrf <- predict(rf, num_happy, type = "response")
-predictrf
-MSErf<- mean((predictrf - num_happy$HappinessScore)^2)
-MSErf
+testrf <- predict(rf, newdata=testd)
+MSE2<- mean((testrf - testd$HappinessScore)^2)
+MSE2
 ```
 
