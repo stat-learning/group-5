@@ -14,7 +14,7 @@ Happiness can define a country. Beyond the great importance of individual and co
 
 ## The Data
 
-Our final dataset pulls data from a wide variety of sources.  We obtained our “happiness” data from the Gallup World Poll.  Our demographic data on countries came from the US Government.  Data on corruption came from Transparency International.  We combined these disparate sources into one data set with 120 observations and 22 variables.  Each observation refers to a country of the world.  
+Our final dataset pulls data from a wide variety of sources.  We obtained our “happiness” data from the Gallup World Poll.  Our demographic data on countries came from the US Government.  Data on corruption came from Transparency International.  We combined these disparate sources into one data set with 120 observations and 22 variables.  Each observation refers to a country of the world.  These combinations created our complete dataset, but required immense data wrangling. As the sources differed, merging by country resulted in errors because each data set recorded country name differently. We had to mutate the data to eliminate these differences: changing all three data sets to reporting “United States” rather than “The United States” or “United States of America.” Additionally, the data was collected by several different organizations, and some data had commas to signify decimals, rather than periods. Variable names had to be normalized and checked for any possible causes of error; for example, GDP Per Capita was originally reported as “GDP ($ per capita)” and the dollar sign prompted errors in the code. After fixing the variable names, merging, and checking the data reporting format, the data was ready for its initial analysis. 
 
 ## Exploratory Data Analysis
 
