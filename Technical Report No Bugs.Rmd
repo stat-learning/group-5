@@ -397,5 +397,7 @@ plot(rf)
 testrf <- predict(rf, newdata=testd)
 MSE2<- mean((testrf - testd$HappinessScore)^2)
 MSE2
+varImpPlot(rf)
+
 ```
 
