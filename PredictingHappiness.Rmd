@@ -9,6 +9,8 @@ We are investigating the World Happiness Index in order to build a model that ca
 
 ## Introduction
 
+Happiness can define a country. Beyond the great importance of individual and community well being which accompanies happiness and positive emotions, studies have shown that positive emotions contribute to “broadening workers’ individual mindsets, enabling them to build up their personal resources in terms of enhanced sensitivity and positive attitudes toward their workplace,” and can increase productivity (De Satio 2019). Those who identify as “happy” have also been cited to perform more “pro-social” behaviors, such as volunteering (Arafa, 2019). Predicting a country’s happiness can aid governments in supporting their citizens, and ensuring greater well being.  In terms of analysis, we employed both data model analysis and algorithmic model analysis.  Two primary research questions guided our project.  First, can we use a mixture of demographic and geographic data to predict Happiness for a country.  Second, is there a significant difference in Happiness Score between regions of the world, and is region a significant predictor of Happiness.
+
 
 ## The Data
 
@@ -16,10 +18,241 @@ Our final dataset pulls data from a wide variety of sources.  We obtained our �
 
 ## Exploratory Data Analysis
 
+Data
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+countries_of_the_world
+Country_happy<- merge(X2017,countries_of_the_world)
+happy_country <- Country_happy %>%
+  na.omit()
+library(stringr)
+names(happy_country)<-str_replace_all(names(happy_country), c(" " = "." , "," = "" ))
+names(happy_country)<-str_replace_all(names(happy_country), c("%" = "", "\\("="", "\\)"="", "\\."="", "\\$"="_"))
+```
+
+Linear Models
+```{r}
+mod1<- lm(HappinessScore~Birthrate, data= happy_country)
+summary(mod1)
+ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Birthrate", y="Happiness Score")+
+ geom_jitter() +
+ stat_smooth(method = "lm")
+```
+```{r}
+summary(happy_country)
+names(happy_country)
+mod2<- lm(HappinessScore~Infantmortalityper1000births+Literacy, data=happy_country)
+summary(mod2)
+ggplot(happy_country, aes(x=Infantmortalityper1000births+Literacy, y=HappinessScore)) +
+  geom_point()+
+  labs(x="Factors", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
+
+```{r}
+num_happy<- happy_country %>%
+  select_if(is.numeric)
+pairs(num_happy[,1:4], pch = 19)
+summary(happy_country)
+```
+
+```{r}
+summary(happy_country)
+names(happy_country)
+mod5<- lm(HappinessScore~GDP_percapita, data=happy_country)
+summary(mod5)
+ggplot(happy_country, aes(x=GDP_percapita, y=HappinessScore)) +
+  geom_point()+
+  labs(x="GDP Per Capita", y="Happiness Score") +
+  geom_jitter()+
+  stat_smooth(method = "lm")
+```
+
+```{r}
+lm1<- lm(HappinessScore~Literacy, data= happy_country)
+summary(lm1)
+lmplot1<- ggplot(happy_country, aes(x = Literacy, y = HappinessScore)) +
+  geom_point() +
+  labs(x="Literacy", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot1
+lm2<- lm(HappinessScore~Birthrate, data= happy_country)
+summary(lm2)
+lmplot2<- ggplot(happy_country, aes(x = Birthrate, y = HappinessScore)) +
+  geom_point() +
+  labs(x="Birthrate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot2
+lm3<- lm(HappinessScore~Deathrate, data= happy_country)
+summary(lm3)
+lmplot3<- ggplot(happy_country, aes(x = Deathrate, y = HappinessScore)) +
+  geom_point() +
+  labs(x="Death Rate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot3
+lm4<- lm(HappinessScore~Climate, data= happy_country)
+summary(lm4)
+lmplot4<- ggplot(happy_country, aes(x = Climate, y = HappinessScore)) +
+  geom_point() +
+  labs(x="Climate", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot4
+lm5<- lm(HappinessScore~Population, data= happy_country)
+summary(lm5)
+lmplot5<- ggplot(happy_country, aes(x = Population, y = HappinessScore)) +
+  geom_point() +
+  labs(x="Population", y="Happiness Score")+
+  geom_jitter() +
+  stat_smooth(method = "lm")
+lmplot5
+```
+
+Ridge and Lasso
+```{r}
+xnew <- model.matrix(HappinessScore~., num_happy)[,-1]
+ynew <- num_happy$HappinessScore
+lambdanew <- 10^seq(10, -2, length = 100)
+library(glmnet)
+set.seed(489)
+trainnew <- sample(1:nrow(xnew), nrow(xnew)/2)
+testnew<- (-trainnew)
+ytestnew <- ynew[testnew]
+#OLS
+happylm <- lm(HappinessScore~., data = num_happy)
+coef(happylm)
+#OLS with interaction
+olsmod<- lm(HappinessScore~Agriculture*Industry*Service, data=num_happy)
+par(mfrow = c(2, 2))
+OLS<- plot(olsmod)
+OLSpred<-predict(olsmod, newdata=num_happy[testnew,])
+OLSMSE<- mean((OLSpred-ytestnew)^2)
+OLSMSE
+#OLS without interaction
+olsmod2<- lm(HappinessScore~Agriculture+Industry+Service, data=num_happy)
+par(mfrow = c(2, 2))
+OLS2<- plot(olsmod2)
+OLSpred2<- predict(olsmod2, newdata = num_happy[testnew,])
+OLS2MSE <- mean((OLSpred2-ytestnew)^2)
+OLS2MSE
+#Clearly interaction is much better
+#ridge
+happyridge <- glmnet(xnew, ynew, alpha = 0, lambda = lambdanew)
+predict(happyridge, s = 0, exact = FALSE, type = 'coefficients')[1:20,]
+happylm1 <- lm(HappinessScore~., data = num_happy)
+happyridge1 <- glmnet(xnew[trainnew,], ynew[trainnew], alpha = 0, lambda = lambdanew)
+#find the best lambda from our list via cross-validation
+cv.out <- cv.glmnet(xnew[trainnew,], ynew[trainnew], alpha = 0)
+plot(cv.out)
+bestlamnew <- cv.out$lambda.min
+#make predictions
+rpred1<- predict(happyridge, s=bestlamnew, newx = xnew[testnew,])
+ridge.prednew <- predict(happyridge1, s = bestlamnew, newx = xnew[testnew,])
+s.prednew <- predict(happylm1, newdata = num_happy[testnew,])
+#check MSE
+rmse1<- mean((rpred1-ytestnew)^2)
+rmse1
+MSEnew<- mean((s.prednew-ytestnew)^2)
+MSEnew
+RidgeMSE<- mean((ridge.prednew-ytestnew)^2)
+RidgeMSE
+out <- glmnet(xnew[trainnew,],ynew[trainnew],alpha = 0)
+plot(out)
+ridgepredictnew<-predict(happyridge1, type = "coefficients", s = bestlamnew)[1:20,]
+ridgepredictnew
+##Lasso
+lasso.mod <- glmnet(xnew[trainnew,], ynew[trainnew], alpha = 1, lambda = lambdanew)
+plot(lasso.mod)
+lasso.pred <- predict(lasso.mod, s = bestlamnew, newx = xnew[testnew,])
+LassoMSE<-mean((lasso.pred-ytestnew)^2)
+LassoMSE
+lasso.coef  <- predict(lasso.mod, type = 'coefficients', s = bestlamnew)[1:20,]
+lasso.coef
+```
+
+```{r}
+CountryPlot<- ggplot(happy_country, aes(x = Country, y = HappinessScore)) +
+ geom_point() +
+ labs(x="Country", y="Happiness Score")
+CountryPlot
+meanHappy<-mean(happy_country[["HappinessScore"]])
+meanHappy
+```
+
+PCA
+```{r}
+pca1 <- prcomp(num_happy, center=TRUE, scale. =  TRUE)
+summary(pca1)
+str(pca1)
+```
+
+```{r}
+library(devtools)
+install_github("vqv/ggbiplot")
+library(ggbiplot)
+```
+
+```{r}
+ggbiplot(pca1)
+dat <- as.data.frame(pca1$x)
+PCAPlot <- ggplot(dat, aes(x = PC1, y = PC2)) +
+  geom_point(size = 3) +
+  xlim(c(-3, 3)) +
+  theme_bw(base_size = 18)
+PCAPlot
+```
+
+Scree Plot
+```{r echo = FALSE, fig.align="center", fig.height = 5.5, fig.width=7}
+d1 <- data.frame(PC = 1:20,
+                PVE = pca1$sdev^2 / sum(pca1$sdev^2))
+ggplot(d1, aes(x = PC, y = PVE)) +
+  geom_line() +
+  geom_point() +
+  theme_bw(base_size = 18)
+```
 
 
+Regression Trees
+```{r}
+library(tree)
+library(MASS)
+regtree<- tree(HappinessScore ~ .-HappinessScore,data=num_happy)
+plot(regtree)
+text(regtree, pretty=0)
+#Prune
+tcv <- cv.tree(regtree, FUN = prune.tree)
+tcv
+plot(tcv$size, tcv$dev, type = "b", xlab = "n leaves", ylab = "error", cex=.75)
+tcv$size[which.min(tcv$dev)]
+tprune <- prune.tree(regtree, best = 8)
+plot(tprune)
+text(tprune, pretty = 0)
+tree_est <- predict(tprune, newdata=num_happy)
+MSE_test<- mean((tree_est - num_happy$HappinessScore)^2)
+MSE_test
+```
 
 ## Modeling
+
+Linear Models
+
+Ridge and Lasso
+
+Regression Trees
+
+Boosted Tree
+
+PCA
+
+
 
 
 ## Discussion
@@ -27,7 +260,9 @@ Our final dataset pulls data from a wide variety of sources.  We obtained our �
 
 ## References
 
+Arafa, S. (2019, April 5). Why Governments Should Care More about Happiness. Greater Good. https://greatergood.berkeley.edu/article/item/why_governments_should_care_more_about_happiness
+De Stasio, S., Fiorilli, C., Benevene, P., Boldrini, F., Ragni, B., Pepe, A., & Maldonado Briegas, J. J. (2019). Subjective Happiness and Compassion Are Enough to Increase Teachers’ Work Engagement? Frontiers in Psychology, 10. https://doi.org/10.3389/fpsyg.2019.02268
 e.V, T. I. (n.d.). Corruption Perceptions Index 2017. Retrieved December 4, 2019, from Www.transparency.org website
 Lasso, Fernando. “Countries of the World Data (World Factbook US Government).” Erasmus University, 26 Apr. 2018.
-“World Happiness Report (Gallup World Poll).” Sustainable Development Solutions Network 
+“World Happiness Report (Gallup World Poll).” Sustainable Development Solutions Network Updates, 28 Feb. 2017.
 
